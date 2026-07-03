@@ -1,50 +1,303 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Para Ti ❤️</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flores animadas — Lirios</title>
 
-<link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#12021a;
+  --bg2:#2b0a47;
+  --bg3:#3a0f5a;
+  --text:#f6f0ff;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+
+body{
+  font-family: Inter, system-ui, sans-serif;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(167,111,233,.15), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(214,167,255,.12), transparent 45%),
+    radial-gradient(ellipse at bottom, var(--bg3), var(--bg2) 50%, var(--bg1));
+  color:var(--text);
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* ---------- FONDO GRANDE ---------- */
+.bg-layer{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+}
+
+canvas{
+  position:absolute;
+  inset:0;
+}
+
+/* ---------- DISPOSITIVO ---------- */
+.device{
+  width:380px;
+  height:760px;
+  max-width:92vw;
+  max-height:92vh;
+  border-radius:28px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+  box-shadow:0 25px 70px rgba(0,0,0,.65);
+}
+
+/* ---------- POEMA ---------- */
+.poem{
+  position:absolute;
+  top:36px;
+  left:20px;
+  right:20px;
+  padding:18px 20px;
+  border-radius:16px;
+  background:rgba(0,0,0,.28);
+  backdrop-filter:blur(8px);
+  text-align:center;
+  overflow:hidden;
+}
+
+.poem h1{
+  font-size:16px;
+  margin-bottom:16px;
+}
+
+.poem p{
+  font-size:14px;
+  line-height:1.65;
+  margin-bottom:16px;
+  opacity:.95;
+}
+
+.poem p:last-child{margin-bottom:0}
+
+/* canvas SOLO para la carta */
+.poem canvas{
+  position:absolute;
+  inset:0;
+  z-index:0;
+}
+
+.poem .text{
+  position:relative;
+  z-index:1;
+}
+
+/* ---------- FLORES ---------- */
+.garden{
+  position:absolute;
+  bottom:20px;
+  left:0;
+  right:0;
+  height:45%;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  pointer-events:none;
+}
+
+.flower{
+  width:110px;
+  margin:0 10px;
+  transform-origin:50% 100%;
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.45));
+}
+
+/* ---------- FIRMA ---------- */
+.signature{
+  position:absolute;
+  bottom:12px;
+  left:0;
+  right:0;
+  text-align:center;
+  font-size:14px;
+  opacity:.9;
+}
+
+.signature span{
+  color:#ff4d6d;
+}
+</style>
 </head>
 
 <body>
 
-<div id="bg"></div>
+<!-- FONDO GRANDE -->
+<div class="bg-layer">
+  <canvas id="bgSymbols"></canvas>
+</div>
 
-<div class="container">
+<div class="device">
 
-  <div id="envelope" class="envelope">
-    <div class="flap"></div>
-    <div class="body"></div>
-    <div class="seal">❤️</div>
-    <div class="text">Toca para abrir</div>
+<div class="poem">
+  <canvas id="cardHearts"></canvas>
+  <div class="text">
+    <h1>Para la mas Guaapa</h1>
+    <p>
+      Hoy miré el cielo y me acordé de ti,<br>
+      no por algo en específico, solo así nomás.<br>
+      El universo estaba tranquilo y pensé<br>
+      que hay personas que se sienten igual de raras de encontrar.
+    </p>
+    <p>
+      Aunque no hemos hablado mucho,<br>
+      igual me dio por escribirte esto en este momento<br>
+      te extraño un poquito, sin mucha razón,<br>
+      aunque la distancia nos separe en la luna,<br>
+      igual te pienso y te deseo cosas bonitas en cada una.
+    </p>
   </div>
+</div>
 
-  <div id="letter" class="letter">
-    <div class="paper">
+<div class="garden" id="garden"></div>
 
-      <div class="heart">❤️</div>
-
-      <h1>Para ti</h1>
-
-      <p>
-        Solo quería dejarte esto.<br><br>
-        Aunque no hablemos tanto y estemos lejos,
-        quería que supieras que me caes muy bien y siempre me acuerdo de ti.<br><br>
-        Espero que tengas días bonitos, que te vaya bien en todo y que sonrías mucho ✨
-      </p>
-
-      <button id="btn">Una última cosita ❤️</button>
-
-      <div id="extra">Cuídate mucho 🌸</div>
-
-    </div>
-  </div>
+<div class="signature">
+ <span>krishnita❤</span>
+</div>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+/* ---------- FONDO GRANDE (símbolos) ---------- */
+const bg=document.getElementById('bgSymbols');
+const bctx=bg.getContext('2d');
+
+function resizeBG(){
+  bg.width=window.innerWidth;
+  bg.height=window.innerHeight;
+}
+window.addEventListener('resize',resizeBG);
+resizeBG();
+
+const symbols=['TKM','K','✦'];
+const falling=[...Array(40)].map(()=>({
+  x:Math.random()*bg.width,
+  y:Math.random()*bg.height,
+  v:Math.random()*0.4+0.2,
+  s:Math.random()*14+10,
+  t:symbols[Math.floor(Math.random()*symbols.length)],
+  a:Math.random()
+}));
+
+function drawBG(){
+  bctx.clearRect(0,0,bg.width,bg.height);
+  falling.forEach(f=>{
+    f.y+=f.v;
+    if(f.y>bg.height+40){
+      f.y=-40;
+      f.x=Math.random()*bg.width;
+    }
+    bctx.globalAlpha=.15;
+    bctx.font=`${f.s}px Inter`;
+    bctx.fillStyle='#fff';
+    bctx.fillText(f.t,f.x,f.y);
+  });
+  requestAnimationFrame(drawBG);
+}
+drawBG();
+
+/* ---------- CORAZONES EN LA CARTA ---------- */
+const ch=document.getElementById('cardHearts');
+const cctx=ch.getContext('2d');
+const poem=document.querySelector('.poem');
+
+function resizeCard(){
+  ch.width=poem.clientWidth;
+  ch.height=poem.clientHeight;
+}
+resizeCard();
+
+const hearts=[...Array(20)].map(()=>({
+  x:Math.random()*ch.width,
+  y:Math.random()*ch.height,
+  v:Math.random()*0.3+0.2,
+  s:Math.random()*0.6+0.4
+}));
+
+function drawCard(){
+  cctx.clearRect(0,0,ch.width,ch.height);
+  hearts.forEach(h=>{
+    h.y+=h.v;
+    if(h.y>ch.height+20){
+      h.y=-20;
+      h.x=Math.random()*ch.width;
+    }
+    cctx.save();
+    cctx.translate(h.x,h.y);
+    cctx.scale(h.s,h.s);
+    cctx.fillStyle='rgba(255,255,255,.5)';
+    cctx.beginPath();
+    cctx.moveTo(0,0);
+    cctx.bezierCurveTo(-6,-6,-14,4,0,14);
+    cctx.bezierCurveTo(14,4,6,-6,0,0);
+    cctx.fill();
+    cctx.restore();
+  });
+  requestAnimationFrame(drawCard);
+}
+drawCard();
+
+/* ---------- FLORES ---------- */
+const garden=document.getElementById('garden');
+const flowers=[];
+
+function createLily(){
+  const d=document.createElement('div');
+  d.className='flower';
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 200 260');
+
+  const stem=document.createElementNS(ns,'rect');
+  stem.setAttribute('x','96');
+  stem.setAttribute('y','120');
+  stem.setAttribute('width','8');
+  stem.setAttribute('height','140');
+  stem.setAttribute('rx','4');
+  stem.setAttribute('fill','#1e7a3a');
+  svg.appendChild(stem);
+
+  const petals=document.createElementNS(ns,'g');
+  petals.setAttribute('transform','translate(100,80)');
+  for(let i=0;i<6;i++){
+    const p=document.createElementNS(ns,'path');
+    p.setAttribute('d','M0 -8 C22 -60 60 -60 72 -8 C60 4 28 8 0 0 Z');
+    p.setAttribute('transform',`rotate(${i*60})`);
+    p.setAttribute('fill',i%2?'#b27ee6':'#d6a7ff');
+    petals.appendChild(p);
+  }
+  svg.appendChild(petals);
+  d.appendChild(svg);
+  return d;
+}
+
+for(let i=0;i<4;i++){
+  const f=createLily();
+  garden.appendChild(f);
+  flowers.push(f);
+}
+
+function animateFlowers(t){
+  const time=t/900;
+  flowers.forEach((f,i)=>{
+    const y=Math.sin(time+i)*8;
+    const r=Math.sin(time*.7+i)*6;
+    f.style.transform=`translateY(${-Math.abs(y)}px) rotate(${r}deg)`;
+  });
+  requestAnimationFrame(animateFlowers);
+}
+animateFlowers();
+</script>
 </body>
 </html>
